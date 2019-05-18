@@ -8,12 +8,27 @@ namespace EntityFrameworkConsole
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            var _context = new AppDbContext();
+            var context = new AppDbContext();
+
+            var test = new LINQTest(context);
+            var ranking = await test.ThanksCardRankingAsync();
+            Console.WriteLine(ObjectDumper.Dump(ranking));
+        }
+    }
+
+    public class LINQTest
+    {
+        private readonly AppDbContext _context;
+
+        public LINQTest(AppDbContext context)
+        {
+            this._context = context;
+
+            // Usersテーブルが空なら初期データを作成する。
             if (_context.Users.Count() == 0)
             {
-                // Usersテーブルが空なら初期データを作成する。
                 var admin = new User { Name="admin", Password="admin", IsAdmin=true };
                 var user  = new User { Name="user", Password="user", IsAdmin=false };
                 _context.Users.Add(admin);
@@ -25,17 +40,19 @@ namespace EntityFrameworkConsole
                 _context.ThanksCards.Add(new ThanksCard { Title="title4", Body="body4", From=user, To=admin,  CreatedDateTime=DateTime.Now});
                 _context.SaveChanges();
             }
+        }
 
-            var ranks = _context.ThanksCards
+        public async Task<IEnumerable<Rank>> ThanksCardRankingAsync()
+        {
+            return await _context.ThanksCards
                                   .GroupBy(t => t.To)
                                   .Select(t => new Rank { Name = t.Key.Name, Count = t.Count() })
                                   .OrderByDescending(t => t.Count)
-                                  .ToList();
-
-            Console.WriteLine(ObjectDumper.Dump(ranks));
+                                  .ToListAsync();
         }
     }
 
+    #region Entities
     public class User
     {
         public long Id { get; set; }
@@ -68,7 +85,9 @@ namespace EntityFrameworkConsole
         public string Name { get; set; }
         public int Count { get; set; }
     }
+    #endregion
 
+    #region DbContext
     public class AppDbContext : DbContext
     {
         protected override void OnConfiguring(DbContextOptionsBuilder opt)
@@ -80,4 +99,5 @@ namespace EntityFrameworkConsole
         public DbSet<Department> Departments { get; set; }
         public DbSet<ThanksCard> ThanksCards { get; set; }
     }
+    #endregion
 }
