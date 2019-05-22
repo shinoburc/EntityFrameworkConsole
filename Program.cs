@@ -13,8 +13,11 @@ namespace EntityFrameworkConsole
             var context = new AppDbContext();
 
             var test = new LINQTest(context);
-            var ranking = await test.ThanksCardRankingAsync();
-            Console.WriteLine(ObjectDumper.Dump(ranking));
+            var userRanking = await test.ThanksCardUserRankingAsync();
+            Console.WriteLine(ObjectDumper.Dump(userRanking));
+
+            var departmentRanking = await test.ThanksCardDepartmentRankingAsync();
+            Console.WriteLine(ObjectDumper.Dump(departmentRanking));
         }
     }
 
@@ -29,23 +32,42 @@ namespace EntityFrameworkConsole
             // Usersテーブルが空なら初期データを作成する。
             if (_context.Users.Count() == 0)
             {
-                var admin = new User { Name="admin", Password="admin", IsAdmin=true };
-                var user  = new User { Name="user", Password="user", IsAdmin=false };
-                _context.Users.Add(admin);
-                _context.Users.Add(user);
+                var dept1 = new Department { Code=1, Name="dept1" };
+                var dept2 = new Department { Code=2, Name="dept2" };
+                _context.Departments.Add(dept1);
+                _context.Departments.Add(dept2);
 
-                _context.ThanksCards.Add(new ThanksCard { Title="title1", Body="body1", From=admin, To=user,  CreatedDateTime=DateTime.Now});
-                _context.ThanksCards.Add(new ThanksCard { Title="title2", Body="body2", From=admin, To=user,  CreatedDateTime=DateTime.Now});
-                _context.ThanksCards.Add(new ThanksCard { Title="title3", Body="body3", From=admin, To=user,  CreatedDateTime=DateTime.Now});
-                _context.ThanksCards.Add(new ThanksCard { Title="title4", Body="body4", From=user, To=admin,  CreatedDateTime=DateTime.Now});
+                var admin  = new User { Name="admin",  Password="admin",  IsAdmin=true,  Department=dept1 };
+                var user1  = new User { Name="user1",  Password="user1",  IsAdmin=false, Department=dept1 };
+                var user2  = new User { Name="user2",  Password="user2",  IsAdmin=false, Department=dept2 };
+                _context.Users.Add(admin);
+                _context.Users.Add(user1);
+                _context.Users.Add(user2);
+
+                _context.ThanksCards.Add(new ThanksCard { Title="title1", Body="body1", From=admin, To=user1, CreatedDateTime=DateTime.Now });
+                _context.ThanksCards.Add(new ThanksCard { Title="title2", Body="body2", From=admin, To=user1, CreatedDateTime=DateTime.Now });
+                _context.ThanksCards.Add(new ThanksCard { Title="title3", Body="body3", From=admin, To=user1, CreatedDateTime=DateTime.Now });
+                _context.ThanksCards.Add(new ThanksCard { Title="title4", Body="body4", From=admin, To=user2, CreatedDateTime=DateTime.Now });
+                _context.ThanksCards.Add(new ThanksCard { Title="title5", Body="body5", From=admin, To=user2, CreatedDateTime=DateTime.Now });
+                _context.ThanksCards.Add(new ThanksCard { Title="title6", Body="body6", From=user1, To=admin, CreatedDateTime=DateTime.Now });
+                _context.ThanksCards.Add(new ThanksCard { Title="title7", Body="body7", From=user2, To=admin, CreatedDateTime=DateTime.Now });
                 _context.SaveChanges();
             }
         }
 
-        public async Task<IEnumerable<Rank>> ThanksCardRankingAsync()
+        public async Task<IEnumerable<Rank>> ThanksCardUserRankingAsync()
         {
             return await _context.ThanksCards
                                   .GroupBy(t => t.To)
+                                  .Select(t => new Rank { Name = t.Key.Name, Count = t.Count() })
+                                  .OrderByDescending(t => t.Count)
+                                  .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Rank>> ThanksCardDepartmentRankingAsync()
+        {
+            return await _context.ThanksCards
+                                  .GroupBy(t => t.To.Department)
                                   .Select(t => new Rank { Name = t.Key.Name, Count = t.Count() })
                                   .OrderByDescending(t => t.Count)
                                   .ToListAsync();
