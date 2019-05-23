@@ -14,7 +14,7 @@ $ cd EntityFrameworkConsole
 $ vi Program.cs
 ```
 
-```Csharp
+```csharp
   opt.UseNpgsql("Host=localhost;Database=consoleapp;Username=postgres;Password=postgres");
 ```
 
