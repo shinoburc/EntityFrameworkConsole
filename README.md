@@ -2,7 +2,7 @@
 
 ## Dependencies
 
-- .NETCore 2.2
+- .NET Core 2.2
 - PostgreSQL
 
 ## Run
