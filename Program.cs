@@ -13,6 +13,13 @@ namespace EntityFrameworkConsole
             var context = new AppDbContext();
 
             var test = new LINQTest(context);
+
+            var departments = await test.GetDepartmentsAsync();
+            foreach(var department in departments)
+            {
+                Console.WriteLine(ObjectDumper.Dump(department));
+            }
+
             var userRanking = await test.ThanksCardUserRankingAsync();
             Console.WriteLine(ObjectDumper.Dump(userRanking));
 
@@ -32,8 +39,8 @@ namespace EntityFrameworkConsole
             // Usersテーブルが空なら初期データを作成する。
             if (_context.Users.Count() == 0)
             {
-                var dept1 = new Department { Code=1, Name="dept1" };
-                var dept2 = new Department { Code=2, Name="dept2" };
+                var dept1 = new Department { Code=1, Name="dept1", Parent=null  };
+                var dept2 = new Department { Code=2, Name="dept2", Parent=dept1 };
                 _context.Departments.Add(dept1);
                 _context.Departments.Add(dept2);
 
@@ -62,7 +69,7 @@ namespace EntityFrameworkConsole
                                   .Select(t => new Rank { Name = t.Key.Name, Count = t.Count() })
                                   .OrderByDescending(t => t.Count)
                                   .ToListAsync();
-        }
+        } 
 
         public async Task<IEnumerable<Rank>> ThanksCardDepartmentRankingAsync()
         {
@@ -70,6 +77,13 @@ namespace EntityFrameworkConsole
                                   .GroupBy(t => t.To.Department)
                                   .Select(t => new Rank { Name = t.Key.Name, Count = t.Count() })
                                   .OrderByDescending(t => t.Count)
+                                  .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Department>> GetDepartmentsAsync()
+        {
+            return await _context.Departments
+                                  .Include(Department => Department.Parent) // Eager-loading
                                   .ToListAsync();
         }
     }
@@ -89,6 +103,8 @@ namespace EntityFrameworkConsole
         public long Id { get; set; }
         public int Code { get; set; }
         public string Name { get; set; }
+        public virtual Department Parent { get; set; }
+        public virtual ICollection<Department> Children { get; set; }
         public virtual ICollection<User> Users { get; set; }
     }
 
