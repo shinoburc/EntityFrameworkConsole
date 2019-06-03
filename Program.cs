@@ -1,7 +1,9 @@
-﻿using System;
+﻿using EntityFrameworkConsole.Models;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace EntityFrameworkConsole
@@ -25,6 +27,27 @@ namespace EntityFrameworkConsole
 
             var departmentRanking = await test.ThanksCardDepartmentRankingAsync();
             Console.WriteLine(ObjectDumper.Dump(departmentRanking));
+
+            var thanksCards = await test.GetThanksCards();
+            Console.WriteLine(ObjectDumper.Dump(thanksCards));
+            foreach (var thanksCard in thanksCards)
+            {
+                Console.WriteLine($"  ThanksCard {thanksCard.Title}");
+                foreach (var tag in thanksCard.Tags)
+                {
+                    Console.WriteLine($"    Tag {tag.Name}");
+                }
+            }
+            /*
+            foreach (var thanksCard in thanksCards)
+            {
+                Console.WriteLine($"  thanksCard {thanksCard.Title}");
+                foreach (var thanksCardTag in thanksCard.ThanksCardTags)
+                {
+                    Console.WriteLine($"    Tag {thanksCardTag.Tag.Name}");
+                }
+            }
+            */
         }
     }
 
@@ -51,13 +74,38 @@ namespace EntityFrameworkConsole
                 _context.Users.Add(user1);
                 _context.Users.Add(user2);
 
-                _context.ThanksCards.Add(new ThanksCard { Title="title1", Body="body1", From=admin, To=user1, CreatedDateTime=DateTime.Now });
-                _context.ThanksCards.Add(new ThanksCard { Title="title2", Body="body2", From=admin, To=user1, CreatedDateTime=DateTime.Now });
-                _context.ThanksCards.Add(new ThanksCard { Title="title3", Body="body3", From=admin, To=user1, CreatedDateTime=DateTime.Now });
-                _context.ThanksCards.Add(new ThanksCard { Title="title4", Body="body4", From=admin, To=user2, CreatedDateTime=DateTime.Now });
-                _context.ThanksCards.Add(new ThanksCard { Title="title5", Body="body5", From=admin, To=user2, CreatedDateTime=DateTime.Now });
-                _context.ThanksCards.Add(new ThanksCard { Title="title6", Body="body6", From=user1, To=admin, CreatedDateTime=DateTime.Now });
-                _context.ThanksCards.Add(new ThanksCard { Title="title7", Body="body7", From=user2, To=admin, CreatedDateTime=DateTime.Now });
+                var tag1 = new Tag { Name="tag1" };
+                var tag2 = new Tag { Name="tag2" };
+                var tag3 = new Tag { Name="tag3" };
+                _context.Tags.Add(tag1);
+                _context.Tags.Add(tag2);
+                _context.Tags.Add(tag3);
+
+                var thanksCard1 = new ThanksCard { Title="title1", Body="body1", From=admin, To=user1, CreatedDateTime=DateTime.Now };
+                var thanksCard2 = new ThanksCard { Title="title2", Body="body2", From=admin, To=user1, CreatedDateTime=DateTime.Now };
+                var thanksCard3 = new ThanksCard { Title="title3", Body="body3", From=admin, To=user1, CreatedDateTime=DateTime.Now };
+                var thanksCard4 = new ThanksCard { Title="title4", Body="body4", From=admin, To=user2, CreatedDateTime=DateTime.Now };
+                var thanksCard5 = new ThanksCard { Title="title5", Body="body5", From=admin, To=user2, CreatedDateTime=DateTime.Now };
+                var thanksCard6 = new ThanksCard { Title="title6", Body="body6", From=user1, To=admin, CreatedDateTime=DateTime.Now };
+                var thanksCard7 = new ThanksCard { Title="title7", Body="body7", From=user2, To=admin, CreatedDateTime=DateTime.Now };
+
+                _context.ThanksCards.Add(thanksCard1);
+                _context.ThanksCards.Add(thanksCard2);
+                _context.ThanksCards.Add(thanksCard3);
+                _context.ThanksCards.Add(thanksCard4);
+                _context.ThanksCards.Add(thanksCard5);
+                _context.ThanksCards.Add(thanksCard6);
+                _context.ThanksCards.Add(thanksCard7);
+
+                var thanksCardTag1 = new ThanksCardTag { ThanksCard=thanksCard1, Tag=tag1 };
+                var thanksCardTag2 = new ThanksCardTag { ThanksCard=thanksCard1, Tag=tag2 };
+                var thanksCardTag3 = new ThanksCardTag { ThanksCard=thanksCard2, Tag=tag2 };
+                var thanksCardTag4 = new ThanksCardTag { ThanksCard=thanksCard2, Tag=tag3 };
+                _context.ThanksCardTags.Add(thanksCardTag1);
+                _context.ThanksCardTags.Add(thanksCardTag2);
+                _context.ThanksCardTags.Add(thanksCardTag3);
+                _context.ThanksCardTags.Add(thanksCardTag4);
+
                 _context.SaveChanges();
             }
         }
@@ -86,56 +134,13 @@ namespace EntityFrameworkConsole
                                   .Include(Department => Department.Parent) // Eager-loading
                                   .ToListAsync();
         }
-    }
 
-    #region Entities
-    public class User
-    {
-        public long Id { get; set; }
-        public string Name { get; set; }
-        public string Password { get; set; }
-        public bool IsAdmin { get; set; }
-        public virtual Department Department { get; set; }
-    }
-
-    public class Department
-    {
-        public long Id { get; set; }
-        public int Code { get; set; }
-        public string Name { get; set; }
-        public virtual Department Parent { get; set; }
-        public virtual ICollection<Department> Children { get; set; }
-        public virtual ICollection<User> Users { get; set; }
-    }
-
-    public class ThanksCard
-    {
-        public long Id { get; set; }
-        public string Title { get; set; }
-        public string Body { get; set; }
-        public virtual User From { get; set; }
-        public virtual User To { get; set; }
-        public DateTime CreatedDateTime { get; set; }
-    }
-
-    public class Rank
-    {
-        public string Name { get; set; }
-        public int Count { get; set; }
-    }
-    #endregion
-
-    #region DbContext
-    public class AppDbContext : DbContext
-    {
-        protected override void OnConfiguring(DbContextOptionsBuilder opt)
+        public async Task<IEnumerable<ThanksCard>> GetThanksCards()
         {
-            base.OnConfiguring(opt);
-            opt.UseNpgsql("Host=localhost;Database=consoleapp;Username=postgres;Password=postgres");
+            return await _context.ThanksCards
+                                  .Include(ThanksCard => ThanksCard.ThanksCardTags) // Eager-loading
+                                  .ThenInclude(ThanksCardTag => ThanksCardTag.Tag) // Load for Many-to-Many
+                                  .ToListAsync();
         }
-        public DbSet<User> Users { get; set; }
-        public DbSet<Department> Departments { get; set; }
-        public DbSet<ThanksCard> ThanksCards { get; set; }
     }
-    #endregion
 }

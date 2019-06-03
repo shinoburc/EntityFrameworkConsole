@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EntityFrameworkConsole.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20190518100855_AddModels")]
-    partial class AddModels
+    [Migration("20190529075708_AddTag")]
+    partial class AddTag
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -30,9 +30,25 @@ namespace EntityFrameworkConsole.Migrations
 
                     b.Property<string>("Name");
 
+                    b.Property<long?>("ParentId");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("ParentId");
+
                     b.ToTable("Departments");
+                });
+
+            modelBuilder.Entity("EntityFrameworkConsole.Tag", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("EntityFrameworkConsole.ThanksCard", b =>
@@ -59,6 +75,24 @@ namespace EntityFrameworkConsole.Migrations
                     b.ToTable("ThanksCards");
                 });
 
+            modelBuilder.Entity("EntityFrameworkConsole.ThanksCardTag", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<long>("TagId");
+
+                    b.Property<long>("ThanksCardId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TagId");
+
+                    b.HasIndex("ThanksCardId");
+
+                    b.ToTable("ThanksCardTags");
+                });
+
             modelBuilder.Entity("EntityFrameworkConsole.User", b =>
                 {
                     b.Property<long>("Id")
@@ -79,6 +113,13 @@ namespace EntityFrameworkConsole.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("EntityFrameworkConsole.Department", b =>
+                {
+                    b.HasOne("EntityFrameworkConsole.Department", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId");
+                });
+
             modelBuilder.Entity("EntityFrameworkConsole.ThanksCard", b =>
                 {
                     b.HasOne("EntityFrameworkConsole.User", "From")
@@ -88,6 +129,19 @@ namespace EntityFrameworkConsole.Migrations
                     b.HasOne("EntityFrameworkConsole.User", "To")
                         .WithMany()
                         .HasForeignKey("ToId");
+                });
+
+            modelBuilder.Entity("EntityFrameworkConsole.ThanksCardTag", b =>
+                {
+                    b.HasOne("EntityFrameworkConsole.Tag", "Tag")
+                        .WithMany("ThanksCardTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("EntityFrameworkConsole.ThanksCard", "ThanksCard")
+                        .WithMany("ThanksCardTags")
+                        .HasForeignKey("ThanksCardId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("EntityFrameworkConsole.User", b =>
