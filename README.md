@@ -11,7 +11,7 @@
 
 $ git clone https://github.com/shinoburc/EntityFrameworkConsole.git
 $ cd EntityFrameworkConsole
-$ vi Program.cs
+$ vi Models/AppDbContext.cs
 ```
 
 ```csharp
