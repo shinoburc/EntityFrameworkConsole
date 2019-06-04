@@ -13,7 +13,6 @@ namespace EntityFrameworkConsole.Models
             base.OnConfiguring(opt);
 
             // Get DB Connection String from appsetting.json
-            System.Diagnostics.Debug.WriteLine("directory:" + Directory.GetCurrentDirectory());
             var builder = new ConfigurationBuilder()
                                 .SetBasePath(Directory.GetCurrentDirectory())
                                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
