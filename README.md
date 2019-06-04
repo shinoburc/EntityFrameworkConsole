@@ -14,10 +14,12 @@ $ cd EntityFrameworkConsole
 $ vi appsettings.json
 ```
 
-```csharp
+```json
+{
   "ConnectionStrings": {
     "AppDbContext": "Host=localhost;Port=5432;User Id=postgres;Password=postgres;Database=consoleapp"
   }
+}
 ```
 
 ```sh
