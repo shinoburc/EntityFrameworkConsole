@@ -11,11 +11,13 @@
 
 $ git clone https://github.com/shinoburc/EntityFrameworkConsole.git
 $ cd EntityFrameworkConsole
-$ vi Models/AppDbContext.cs
+$ vi appsettings.json
 ```
 
 ```csharp
-  opt.UseNpgsql("Host=localhost;Database=consoleapp;Username=postgres;Password=postgres");
+  "ConnectionStrings": {
+    "AppDbContext": "Host=localhost;Port=5432;User Id=postgres;Password=postgres;Database=consoleapp"
+  }
 ```
 
 ```sh
