@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace EntityFrameworkConsole.Models
 {
@@ -9,8 +11,16 @@ namespace EntityFrameworkConsole.Models
         protected override void OnConfiguring(DbContextOptionsBuilder opt)
         {
             base.OnConfiguring(opt);
-            opt.UseNpgsql("Host=localhost;Database=consoleapp;Username=postgres;Password=postgres");
+
+            // Get DB Connection String from appsetting.json
+            System.Diagnostics.Debug.WriteLine("directory:" + Directory.GetCurrentDirectory());
+            var builder = new ConfigurationBuilder()
+                                .SetBasePath(Directory.GetCurrentDirectory())
+                                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            IConfigurationRoot configuration = builder.Build();
+            opt.UseNpgsql(configuration.GetConnectionString("AppDbContext"));
         }
+
         public DbSet<User> Users { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<ThanksCard> ThanksCards { get; set; }
