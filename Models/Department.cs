@@ -8,6 +8,7 @@ namespace EntityFrameworkConsole.Models
         public long Id { get; set; }
         public int Code { get; set; }
         public string Name { get; set; }
+        public long ParentId { get; set; }
         public virtual Department Parent { get; set; }
         public virtual ICollection<Department> Children { get; set; }
         public virtual ICollection<User> Users { get; set; }

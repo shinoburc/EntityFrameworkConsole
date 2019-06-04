@@ -9,6 +9,7 @@ namespace EntityFrameworkConsole.Models
         public string Name { get; set; }
         public string Password { get; set; }
         public bool IsAdmin { get; set; }
+        public long DepartmentId { get; set; }
         public virtual Department Department { get; set; }
     }
 }
