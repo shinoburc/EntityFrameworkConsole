@@ -9,7 +9,13 @@ namespace EntityFrameworkConsole
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
+        {
+            Program.Main();
+            Console.ReadKey();
+        }
+
+        static async Task Main()
         {
             var context = new AppDbContext();
 
