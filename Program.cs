@@ -144,7 +144,7 @@ namespace EntityFrameworkConsole
         {
             return await _context.ThanksCards
                                   .Include(ThanksCard => ThanksCard.ThanksCardTags) // Eager-loading
-                                  .ThenInclude(ThanksCardTag => ThanksCardTag.Tag) // Load for Many-to-Many
+                                    .ThenInclude(ThanksCardTag => ThanksCardTag.Tag) // Load for Many-to-Many
                                   .ToListAsync();
         }
     }
