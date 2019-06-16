@@ -25,5 +25,6 @@ namespace EntityFrameworkConsole.Models
         public DbSet<ThanksCard> ThanksCards { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ThanksCardTag> ThanksCardTags { get; set; }
+        public DbSet<Data> Data { get; set; }
     }
 }

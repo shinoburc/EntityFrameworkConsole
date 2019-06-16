@@ -53,6 +53,9 @@ namespace EntityFrameworkConsole
                 }
             }
             */
+
+            var data = await test.GetData();
+            Console.WriteLine(ObjectDumper.Dump(data));
         }
     }
 
@@ -111,6 +114,11 @@ namespace EntityFrameworkConsole
                 _context.ThanksCardTags.Add(thanksCardTag3);
                 _context.ThanksCardTags.Add(thanksCardTag4);
 
+                for(int i = 0; i < 10; i++)
+                {
+                    Data data = new Data { Value = i * 10 + (i * i), DateTime = DateTime.Now };
+                    _context.Data.Add(data);
+                }
                 _context.SaveChanges();
             }
         }
@@ -146,6 +154,12 @@ namespace EntityFrameworkConsole
                                   .Include(ThanksCard => ThanksCard.ThanksCardTags) // Eager-loading
                                     .ThenInclude(ThanksCardTag => ThanksCardTag.Tag) // Load for Many-to-Many
                                   .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Data>> GetData()
+        {
+            var data = await _context.Data.OrderBy(d => d.Id).ToListAsync();
+            return data.Zip(data.Skip(1), (prev, next) => new Data { Value = next.Value - prev.Value, DateTime = prev.DateTime });
         }
     }
 }
