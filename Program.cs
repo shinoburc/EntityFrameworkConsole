@@ -114,6 +114,12 @@ namespace EntityFrameworkConsole
                 _context.ThanksCardTags.Add(thanksCardTag3);
                 _context.ThanksCardTags.Add(thanksCardTag4);
 
+                _context.SaveChanges();
+            }
+
+            // Data テーブルが空なら初期データを作成する。
+            if (_context.Data.Count() == 0)
+            {
                 for(int i = 0; i < 10; i++)
                 {
                     Data data = new Data { Value = i * 10 + (i * i), DateTime = DateTime.Now };
