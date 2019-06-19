@@ -56,6 +56,9 @@ namespace EntityFrameworkConsole
 
             var data = await test.GetData();
             Console.WriteLine(ObjectDumper.Dump(data));
+
+            var dataAnonymouseClassType = await test.GetDataAnonymouseClass();
+            Console.WriteLine(ObjectDumper.Dump(dataAnonymouseClassType));
         }
     }
 
@@ -166,6 +169,12 @@ namespace EntityFrameworkConsole
         {
             var data = await _context.Data.OrderBy(d => d.Id).ToListAsync();
             return data.Zip(data.Skip(1), (prev, next) => new Data { Value = next.Value - prev.Value, DateTime = prev.DateTime });
+        }
+
+        public async Task<IEnumerable<dynamic>> GetDataAnonymouseClass()
+        {
+            var data = await _context.Data.OrderBy(d => d.Id).ToListAsync();
+            return data.Zip(data.Skip(1), (prev, next) => new { Value = next.Value - prev.Value, DateTime = prev.DateTime });
         }
     }
 }
